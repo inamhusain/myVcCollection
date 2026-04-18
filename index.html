@@ -1093,7 +1093,35 @@
 
     .card-scroll-area::-webkit-scrollbar-thumb {
       background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
+      border-radius: 100px;
+    }
+
+    /* Password Toggle */
+    .password-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    .pass-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-2);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color var(--transition);
+      user-select: none;
+    }
+
+    .pass-toggle:hover {
+      color: var(--text-1);
     }
 
     /* Desktop Table */
@@ -1545,7 +1573,11 @@
       <p class="login-sub">Sign in to manage your ledger</p>
       <div class="form-stack">
         <input id="username" class="input" type="text" placeholder="Username" autocomplete="username" />
-        <input id="password" class="input" type="password" placeholder="Password" autocomplete="current-password" />
+        <div class="password-wrap">
+          <input id="password" class="input" type="password" placeholder="Password" autocomplete="current-password"
+            style="padding-right: 40px;" />
+          <button type="button" class="pass-toggle" onclick="togglePasswordVisibility()" tabindex="-1">👁️</button>
+        </div>
         <button id="loginBtn" class="btn btn-primary" style="margin-top:4px;" onclick="login()">Sign In</button>
       </div>
     </div>
@@ -1848,6 +1880,18 @@
     /* ================================================
        LOGIN
     ================================================ */
+    function togglePasswordVisibility() {
+      const passInput = document.getElementById('password');
+      const toggleBtn = event.currentTarget;
+      if (passInput.type === 'password') {
+        passInput.type = 'text';
+        toggleBtn.textContent = '🔒';
+      } else {
+        passInput.type = 'password';
+        toggleBtn.textContent = '👁️';
+      }
+    }
+
     async function login() {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
