@@ -1,0 +1,2718 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>VC Collection System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================
+   DESIGN TOKENS
+==============================*/
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.35);
+      --bg: #0c1220;
+      --bg-surface: #111827;
+      --bg-elevated: #1a2235;
+      --glass: rgba(17, 24, 39, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.07);
+      --text-1: #f1f5f9;
+      --text-2: #94a3b8;
+      --text-3: #475569;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warn: #f59e0b;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.35);
+      --shadow-float: 0 12px 48px rgba(0, 0, 0, 0.5);
+      --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      overflow-x: hidden;
+    }
+
+    /* Animated background orbs */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(80px);
+    }
+
+    body::before {
+      width: 600px;
+      height: 600px;
+      top: -200px;
+      left: -200px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+      animation: orb1 18s ease-in-out infinite;
+    }
+
+    body::after {
+      width: 500px;
+      height: 500px;
+      bottom: -150px;
+      right: -150px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+      animation: orb2 22s ease-in-out infinite;
+    }
+
+    @keyframes orb1 {
+
+      0%,
+      100% {
+        transform: translate(0, 0);
+      }
+
+      50% {
+        transform: translate(60px, 40px);
+      }
+    }
+
+    @keyframes orb2 {
+
+      0%,
+      100% {
+        transform: translate(0, 0);
+      }
+
+      50% {
+        transform: translate(-40px, -30px);
+      }
+    }
+
+    /* ============================
+   UTILITIES
+==============================*/
+    .hidden {
+      display: none !important;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .col {
+      flex-direction: column;
+    }
+
+    .gap-8 {
+      gap: 8px;
+    }
+
+    .gap-12 {
+      gap: 12px;
+    }
+
+    .gap-16 {
+      gap: 16px;
+    }
+
+    .center {
+      align-items: center;
+      justify-content: center;
+    }
+
+    .between {
+      justify-content: space-between;
+    }
+
+    .relative {
+      position: relative;
+    }
+
+    /* ============================
+   GLASS CARD
+==============================*/
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+    }
+
+    /* ============================
+   BUTTONS (COMMON COMPONENT)
+==============================*/
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+      outline: none;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      box-shadow: 0 4px 18px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px var(--primary-glow);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-1);
+      border: 1px solid var(--glass-border);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-danger-ghost {
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-danger-ghost:hover {
+      background: rgba(239, 68, 68, 0.18);
+    }
+
+    .btn-warn {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-warn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-warn:active {
+      transform: translateY(0);
+    }
+
+    .btn-sm {
+      padding: 8px 14px;
+      font-size: 13px;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-icon {
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition);
+      color: var(--text-2);
+    }
+
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text-1);
+    }
+
+    /* Ripple on buttons */
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .btn:active::after {
+      opacity: 1;
+    }
+
+    /* ============================
+   BADGE/CHIP (COMMON COMPONENT)
+==============================*/
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    .badge-credit {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .badge-debit {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .badge-credit .badge-dot {
+      background: var(--success);
+    }
+
+    .badge-debit .badge-dot {
+      background: var(--danger);
+    }
+
+    .badge-expense {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+
+    .badge-expense .badge-dot {
+      background: var(--warn);
+    }
+
+    .badge-info {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .badge-info .badge-dot {
+      background: var(--primary);
+    }
+
+    /* ============================
+   FORM INPUTS (COMMON COMPONENT)
+==============================*/
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      color: var(--text-1);
+      font-family: inherit;
+      font-size: 14px;
+      transition: all var(--transition);
+    }
+
+    .input::placeholder {
+      color: var(--text-3);
+    }
+
+    .input:focus {
+      outline: none;
+      background: rgba(59, 130, 246, 0.07);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+
+    select.input {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 38px;
+    }
+
+    select.input option {
+      background: var(--bg-elevated);
+      color: var(--text-1);
+    }
+
+    /* ============================
+   SPINNER (COMMON COMPONENT)
+==============================*/
+    .spinner {
+      display: inline-block;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-top-color: rgba(255, 255, 255, 0.8);
+      animation: spin 0.65s linear infinite;
+      flex-shrink: 0;
+    }
+
+    .spinner-sm {
+      width: 14px;
+      height: 14px;
+    }
+
+    .spinner-md {
+      width: 20px;
+      height: 20px;
+    }
+
+    .spinner-lg {
+      width: 32px;
+      height: 32px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ============================
+   SKELETON LOADER (COMMON COMPONENT)
+==============================*/
+    .skeleton {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+      border-radius: 6px;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    .skeleton-row {
+      height: 16px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .skeleton-row.w-60 {
+      width: 60%;
+    }
+
+    .skeleton-row.w-40 {
+      width: 40%;
+    }
+
+    .skeleton-row.w-80 {
+      width: 80%;
+    }
+
+    /* ============================
+   TOAST (COMMON COMPONENT)
+==============================*/
+    #toastContainer {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    .toast {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-float);
+      backdrop-filter: blur(20px);
+      max-width: 320px;
+      pointer-events: all;
+      animation: toastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .toast.out {
+      animation: toastOut 0.25s ease forwards;
+    }
+
+    .toast-icon {
+      font-size: 16px;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .toast-text {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .toast-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .toast-sub {
+      font-size: 12px;
+      color: var(--text-2);
+    }
+
+    .toast.success {
+      border-left: 3px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 3px solid var(--danger);
+    }
+
+    .toast.info {
+      border-left: 3px solid var(--primary);
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(32px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes toastOut {
+      to {
+        opacity: 0;
+        transform: translateX(32px);
+      }
+    }
+
+    /* ============================
+   MODAL (COMMON COMPONENT)
+==============================*/
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition);
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 480px;
+      padding: 32px;
+      border-radius: var(--radius-xl);
+      position: relative;
+      transform: scale(0.95) translateY(20px);
+      transition: transform var(--transition);
+    }
+
+    .modal-backdrop.open .modal-box {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.07);
+      border: none;
+      color: var(--text-2);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text-1);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .modal-sub {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-bottom: 24px;
+    }
+
+    .form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+    }
+
+    /* ============================
+   CUSTOM SELECT (COMMON COMPONENT)
+==============================*/
+    .custom-select {
+      position: relative;
+    }
+
+    .select-trigger {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      color: var(--text-1);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all var(--transition);
+      user-select: none;
+    }
+
+    .select-trigger:hover {
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .select-trigger.open {
+      background: rgba(59, 130, 246, 0.07);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+
+    .select-placeholder {
+      color: var(--text-3);
+    }
+
+    .chevron {
+      transition: transform var(--transition);
+      font-style: normal;
+      font-size: 12px;
+      color: var(--text-2);
+    }
+
+    .chevron.up {
+      transform: rotate(180deg);
+    }
+
+    .select-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: var(--bg-elevated);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-float);
+      z-index: 300;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: all 0.18s ease;
+    }
+
+    .select-dropdown.open {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    .select-search-wrap {
+      padding: 10px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .select-search-wrap .input {
+      padding: 9px 12px;
+      font-size: 13px;
+      border-radius: var(--radius-sm);
+    }
+
+    .select-list {
+      overflow-y: auto;
+      max-height: 220px;
+      overscroll-behavior: contain;
+    }
+
+    .select-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .select-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+
+    .select-opt {
+      padding: 11px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .select-opt:hover {
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    .select-opt.selected {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+    }
+
+    .select-opt .avatar-xs {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .select-empty {
+      padding: 18px 16px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 13px;
+    }
+
+    /* ============================
+   LOGIN PAGE
+==============================*/
+    #loginPage {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 400px;
+      padding: 44px 36px;
+      animation: floatIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes floatIn {
+      from {
+        opacity: 0;
+        transform: translateY(36px) scale(0.97);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .login-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 24px;
+      box-shadow: 0 8px 24px var(--primary-glow);
+    }
+
+    .login-title {
+      font-size: 26px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .login-sub {
+      font-size: 14px;
+      color: var(--text-2);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .login-box .btn {
+      margin-top: 8px;
+    }
+
+    /* ============================
+   DASHBOARD LAYOUT
+==============================*/
+    #dashboardPage {
+      display: none;
+      position: relative;
+      z-index: 1;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    #dashboardPage.show {
+      display: flex;
+      animation: fadeSlide 0.5s ease;
+    }
+
+    @keyframes fadeSlide {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 16px 24px;
+      background: rgba(12, 18, 32, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+
+    .brand-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .brand-name span {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-2);
+      display: block;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 100px;
+      font-size: 13px;
+      color: var(--text-2);
+      max-width: 160px;
+      overflow: hidden;
+    }
+
+    .user-chip strong {
+      color: var(--text-1);
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .page-body {
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* ============================
+   STATS ROW
+==============================*/
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      padding: 22px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.03) 100%);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--transition);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-2);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 10px;
+    }
+
+    .stat-icon {
+      font-size: 22px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-value.loading {
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-skeleton {
+      height: 30px;
+      width: 80%;
+      margin-top: 4px;
+    }
+
+    /* ============================
+   TABLE SECTION
+==============================*/
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title .count-pill {
+      padding: 2px 9px;
+      border-radius: 100px;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Search Bar */
+    .search-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 260px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px 7px 32px;
+      color: var(--text-1);
+      font-size: 13px;
+      transition: all var(--transition);
+    }
+
+    .search-input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--primary);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      opacity: 0.5;
+    }
+
+    .table-section {
+      margin-bottom: 24px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-scroll-area {
+      max-height: 480px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      margin-top: 8px;
+      padding-right: 4px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .card-scroll-area::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .card-scroll-area::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    /* Desktop Table */
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      padding: 11px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      border-bottom: 1px solid var(--glass-border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 13px 14px;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tr.pending td {
+      opacity: 0.45;
+    }
+
+    .data-table tr {
+      transition: background var(--transition);
+    }
+
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* User cell */
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .user-cell .avatar-sm {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #1e40af);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .amount-cell {
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .amount-cell.credit {
+      color: #6ee7b7;
+    }
+
+    .amount-cell.debit {
+      color: #fca5a5;
+    }
+
+    .amount-cell.expense {
+      color: #fcd34d;
+    }
+
+    /* Desktop action buttons */
+    .row-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-row-edit {
+      padding: 5px 11px;
+      font-size: 12px;
+      background: rgba(59, 130, 246, 0.12);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all var(--transition);
+    }
+
+    .btn-row-edit:hover {
+      background: rgba(59, 130, 246, 0.22);
+    }
+
+    .btn-row-del {
+      padding: 5px 11px;
+      font-size: 12px;
+      background: rgba(239, 68, 68, 0.12);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all var(--transition);
+    }
+
+    .btn-row-del:hover {
+      background: rgba(239, 68, 68, 0.22);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-3);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      display: block;
+      margin-bottom: 14px;
+    }
+
+    .empty-text {
+      font-size: 15px;
+    }
+
+    /* Infinite scroll sentinel */
+    .scroll-sentinel {
+      height: 1px;
+    }
+
+    .load-more-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px;
+      color: var(--text-2);
+      font-size: 13px;
+    }
+
+    /* ============================
+   MOBILE CARD LIST
+==============================*/
+    .mobile-list {
+      display: none;
+    }
+
+    .entry-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      transition: all var(--transition);
+      animation: cardIn 0.3s ease;
+    }
+
+    @keyframes cardIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .entry-card.pending {
+      opacity: 0.45;
+    }
+
+    .entry-card:hover {
+      border-color: rgba(59, 130, 246, 0.25);
+      background: rgba(59, 130, 246, 0.04);
+    }
+
+    .entry-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .entry-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .entry-user-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .entry-user-month {
+      font-size: 12px;
+      color: var(--text-2);
+      margin-top: 1px;
+    }
+
+    .entry-amount-big {
+      font-size: 20px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .entry-amount-big.credit {
+      color: #6ee7b7;
+    }
+
+    .entry-amount-big.debit {
+      color: #fca5a5;
+    }
+
+    .entry-card-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .entry-card-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mobile-list .btn-row-edit,
+    .mobile-list .btn-row-del {
+      font-size: 11px;
+      padding: 5px 12px;
+    }
+
+    /* Audit log cards */
+    .audit-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--glass-border);
+      transition: background var(--transition);
+    }
+
+    .audit-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .audit-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .audit-icon-wrap.credit {
+      background: rgba(16, 185, 129, 0.12);
+      color: #6ee7b7;
+    }
+
+    .audit-icon-wrap.debit {
+      background: rgba(239, 68, 68, 0.12);
+      color: #fca5a5;
+    }
+
+    .audit-icon-wrap.info {
+      background: rgba(59, 130, 246, 0.12);
+      color: #60a5fa;
+    }
+
+    .audit-icon-wrap.expense {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fcd34d;
+    }
+
+    .audit-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .audit-action {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .audit-meta {
+      font-size: 12px;
+      color: var(--text-2);
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .audit-amount {
+      font-size: 14px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .audit-amount.credit {
+      color: #6ee7b7;
+    }
+
+    .audit-amount.debit {
+      color: #fca5a5;
+    }
+
+    /* ============================
+   CONFIRM DIALOG (COMMON COMPONENT)
+==============================*/
+    #confirmModal .confirm-icon {
+      font-size: 44px;
+      text-align: center;
+      display: block;
+      margin: 0 auto 16px;
+    }
+
+    #confirmModal .confirm-msg {
+      font-size: 15px;
+      color: var(--text-2);
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    /* ============================
+   MOBILE MEDIA QUERIES
+==============================*/
+    @media (max-width: 768px) {
+      .app-header {
+        padding: 12px 16px;
+      }
+
+      .user-chip span:first-child {
+        display: none;
+      }
+
+      .page-body {
+        padding: 16px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .stat-card {
+        padding: 16px;
+      }
+
+      .stat-value {
+        font-size: 22px;
+      }
+
+      .table-section {
+        padding: 16px;
+      }
+
+      /* Hide desktop table, show mobile cards */
+      .table-wrap {
+        display: none;
+      }
+
+      .mobile-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      /* Hide certain audit table columns */
+      #confirmModal .modal-box {
+        padding: 28px 20px;
+      }
+
+      #toastContainer {
+        bottom: 16px;
+        right: 12px;
+        left: 12px;
+      }
+
+      .toast {
+        max-width: none;
+      }
+
+      .modal-actions {
+        flex-direction: column-reverse;
+      }
+
+      .modal-backdrop {
+        padding: 12px;
+      }
+
+      .modal-box {
+        padding: 24px 20px;
+        border-radius: var(--radius-lg);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header-brand .brand-name span {
+        display: none;
+      }
+
+      .user-chip {
+        max-width: 100px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Toast Container -->
+  <div id="toastContainer"></div>
+
+  <!-- ============================
+     LOGIN PAGE
+==============================-->
+  <div id="loginPage">
+    <div class="card login-box">
+      <div class="login-logo">💰</div>
+      <h1 class="login-title">VC Collection</h1>
+      <p class="login-sub">Sign in to manage your ledger</p>
+      <div class="form-stack">
+        <input id="username" class="input" type="text" placeholder="Username" autocomplete="username" />
+        <input id="password" class="input" type="password" placeholder="Password" autocomplete="current-password" />
+        <button id="loginBtn" class="btn btn-primary" style="margin-top:4px;" onclick="login()">Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================
+     DASHBOARD PAGE
+==============================-->
+  <div id="dashboardPage">
+
+    <!-- Sticky Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-icon">💰</div>
+        <div class="brand-name">
+          VC Collection
+          <span>Ledger System</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="user-chip">
+          <div class="avatar" id="userAvatar">U</div>
+          <strong id="userNameChip">User</strong>
+        </div>
+        <button id="logoutBtn" class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+        <button id="headerExpenseBtn" class="btn btn-warn btn-sm" onclick="openExpenseModal()">💸 Expense</button>
+        <button id="headerAddEntryBtn" class="btn btn-primary btn-sm" onclick="openEntryModal()">+ Add Entry</button>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Stats -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <span class="stat-icon">📈</span>
+          <div class="stat-label">Total Credit</div>
+          <div class="stat-value" id="totalCredit">₹—</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">📉</span>
+          <div class="stat-label">Total Debit</div>
+          <div class="stat-value" id="totalDebit">₹—</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">💼</span>
+          <div class="stat-label">Current VC</div>
+          <div class="stat-value" id="currentVC">₹—</div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-icon">💸</span>
+          <div class="stat-label">Total Expense</div>
+          <div class="stat-value" id="totalExpense">₹—</div>
+        </div>
+      </div>
+
+      <!-- Entries Section -->
+      <div class="card table-section" id="entriesSection">
+        <div class="section-header">
+          <div class="section-title">
+            Recent Entries
+            <span class="count-pill" id="entriesCount">0</span>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:12px; flex:1; justify-content:flex-end; flex-wrap:wrap;">
+            <select class="input" style="width: auto; padding: 7px 12px; height: 36px; font-size: 13px;"
+              onchange="handleTypeFilter(this.value)">
+              <option value="all">All Types</option>
+              <option value="Credit">Credit</option>
+              <option value="Debit">Debit</option>
+              <option value="Expense">Expense</option>
+            </select>
+            <div class="search-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="search-input" placeholder="Search user or desc..."
+                oninput="handleSearch(this.value)" />
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="refreshDashboard()" id="refreshBtn" title="Refresh">
+              ↻ Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Scrollable Content Area -->
+        <div class="card-scroll-area">
+          <!-- Desktop Table -->
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>User / Desc</th>
+                  <th>Month</th>
+                  <th>Amount</th>
+                  <th>Type</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="entryTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Cards -->
+          <div class="mobile-list" id="entryCardList"></div>
+
+          <!-- Infinite scroll sentinel -->
+          <div class="scroll-sentinel" id="entrySentinel"></div>
+        </div>
+
+        <div class="load-more-indicator hidden" id="loadMoreIndicator">
+          <div class="spinner spinner-sm"></div>
+          <span>Loading more…</span>
+        </div>
+      </div>
+
+      <!-- Audit Logs Section -->
+      <div class="card table-section" id="auditSection">
+        <div class="section-header">
+          <div class="section-title">Audit Log</div>
+        </div>
+
+        <!-- Scrollable Content Area -->
+        <div class="card-scroll-area">
+          <!-- Desktop Table -->
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>User</th>
+                  <th>Performed By</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="auditTableBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Mobile: audit cards -->
+          <div class="mobile-list" id="auditCardList"></div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </div><!-- /dashboardPage -->
+
+  <!-- ============================
+     ENTRY MODAL
+==============================-->
+  <div class="modal-backdrop" id="entryModal">
+    <div class="card modal-box">
+      <button class="modal-close" onclick="closeEntryModal()">×</button>
+      <h2 class="modal-title" id="modalTitle">Add Entry</h2>
+      <p class="modal-sub" id="modalSub">Fill in the details below</p>
+      <div class="form-stack">
+
+        <!-- Custom user select -->
+        <div class="custom-select" id="userSelectWrap">
+          <div class="select-trigger" id="userSelectTrigger" onclick="toggleUserDrop()">
+            <span id="userSelectLabel" class="select-placeholder">Select User</span>
+            <i class="chevron" id="userChevron">▾</i>
+          </div>
+          <div class="select-dropdown" id="userDropdown">
+            <div class="select-search-wrap">
+              <input class="input" type="text" id="userSearch" placeholder="Search users…" oninput="filterUsers()" />
+            </div>
+            <div class="select-list" id="userOptionList"></div>
+          </div>
+        </div>
+
+        <select id="entryMonth" class="input">
+          <option value="">Select Month</option>
+          <option>January</option>
+          <option>February</option>
+          <option>March</option>
+          <option>April</option>
+          <option>May</option>
+          <option>June</option>
+          <option>July</option>
+          <option>August</option>
+          <option>September</option>
+          <option>October</option>
+          <option>November</option>
+          <option>December</option>
+        </select>
+
+        <input id="entryAmount" class="input" type="number" placeholder="Amount (₹)" min="0" />
+
+        <select id="entryType" class="input">
+          <option>Credit</option>
+          <option>Debit</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button id="saveEntryBtn" class="btn btn-primary" onclick="saveEntry()">Save Entry</button>
+        <button class="btn btn-ghost" onclick="closeEntryModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================
+     CONFIRM DIALOG
+==============================-->
+  <div class="modal-backdrop" id="confirmModal">
+    <div class="card modal-box" style="max-width:380px; text-align:center;">
+      <span class="confirm-icon" id="confirmIcon">🗑️</span>
+      <h2 class="modal-title" id="confirmTitle" style="text-align:center;">Delete Entry?</h2>
+      <p class="confirm-msg" id="confirmMsg">This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button id="confirmOkBtn" class="btn btn-danger-ghost" onclick="confirmAction()">Delete</button>
+        <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================
+     EXPENSE MODAL
+==============================-->
+  <div class="modal-backdrop" id="expenseModal">
+    <div class="card modal-box">
+      <button class="modal-close" onclick="closeExpenseModal()">×</button>
+      <h2 class="modal-title">Add Expense</h2>
+      <p class="modal-sub">Record a VC fund expense</p>
+      <div class="form-stack">
+        <input id="expenseDesc" class="input" type="text" placeholder="Description (e.g. Tea, Snacks, Event…)" />
+        <input id="expenseAmount" class="input" type="number" placeholder="Amount (₹)" min="0" />
+        <input id="expenseDate" class="input" type="date" />
+      </div>
+      <div class="modal-actions">
+        <button id="saveExpenseBtn" class="btn btn-warn" onclick="saveExpense()">💸 Save Expense</button>
+        <button class="btn btn-ghost" onclick="closeExpenseModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ================================================
+       APP STATE  (in-memory only — no localStorage)
+    ================================================ */
+    const STATE = {
+      currentUser: null,   // { name, username, role }
+      usersList: [],     // array of username strings
+      allEntries: [],     // full list from API
+      displayedCount: 0,     // how many are rendered (infinite scroll)
+      PAGE_SIZE: 15,     // entries per scroll page
+      stats: { totalCredit: 0, totalDebit: 0, currentVC: 0, totalExpense: 0 },
+      pendingOps: new Map(),  // rowId → 'pending' | 'deleting'
+      confirmCallback: null,
+      editRowId: null,
+      selectedUser: null,
+      searchQuery: '',     // Track search filter
+      filterType: 'all',   // Track type filter
+    };
+
+    const API_URL = "https://script.google.com/macros/s/AKfycbxRAtqTS1M1c4E-Y6mT7sjhmS2DXh8Tron4SyQu8iM9wCBWSxHhGmEBmMRr0rDnoBCq/exec";
+
+    /* ================================================
+       TOAST (COMMON COMPONENT)
+    ================================================ */
+    function showToast(title, sub = '', type = 'success') {
+      const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `
+    <span class="toast-icon">${icons[type]}</span>
+    <div class="toast-text">
+      <div class="toast-title">${title}</div>
+      ${sub ? `<div class="toast-sub">${sub}</div>` : ''}
+    </div>`;
+      container.appendChild(el);
+      const remove = () => {
+        el.classList.add('out');
+        setTimeout(() => el.remove(), 260);
+      };
+      const t = setTimeout(remove, 3500);
+      el.onclick = () => { clearTimeout(t); remove(); };
+    }
+
+    /* ================================================
+       CONFIRM DIALOG (COMMON COMPONENT)
+    ================================================ */
+    function openConfirm(title, msg, icon, callback) {
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMsg').textContent = msg;
+      document.getElementById('confirmIcon').textContent = icon || '⚠️';
+      STATE.confirmCallback = callback;
+      document.getElementById('confirmModal').classList.add('open');
+    }
+    function closeConfirm() {
+      document.getElementById('confirmModal').classList.remove('open');
+      STATE.confirmCallback = null;
+    }
+    function confirmAction() {
+      const cb = STATE.confirmCallback;
+      closeConfirm();
+      if (cb) cb();
+    }
+
+    /* ================================================
+       LOGIN
+    ================================================ */
+    async function login() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const btn = document.getElementById('loginBtn');
+      if (!username || !password) { showToast('Missing credentials', 'Enter username and password', 'error'); return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner spinner-sm"></div> Signing In…';
+      try {
+        const res = await fetch(`${API_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
+        const data = await res.json();
+        if (!data.success || !data.user) {
+          showToast('Login failed', data.message || 'Invalid credentials', 'error');
+          return;
+        }
+        STATE.currentUser = data.user;
+        localStorage.setItem('vcToken', data.token);
+        localStorage.setItem('vcUser', JSON.stringify(data.user));
+
+        showDashboard();
+
+        loadUsersList();
+        loadDashboard();
+      } catch {
+        showToast('Connection error', 'Please check your internet connection', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }
+    }
+
+    function showDashboard() {
+      document.getElementById('loginPage').classList.add('hidden');
+      const dash = document.getElementById('dashboardPage');
+      dash.classList.add('show');
+
+      const name = STATE.currentUser.name || STATE.currentUser.username || 'User';
+      const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('userNameChip').textContent = name;
+
+      // Show skeleton stats immediately
+      renderSkeletonStats();
+
+      // Role-based visibility
+      const isAdmin = String(STATE.currentUser.role).toLowerCase() === 'admin';
+      const hideIfMember = isAdmin ? 'block' : 'none';
+
+      document.getElementById('headerExpenseBtn').style.display = hideIfMember;
+      document.getElementById('headerAddEntryBtn').style.display = hideIfMember;
+      document.getElementById('auditSection').style.display = hideIfMember;
+    }
+
+    async function logout() {
+      const btn = document.getElementById('logoutBtn');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner spinner-sm"></div>';
+
+      const token = localStorage.getItem('vcToken');
+      if (token) {
+        try {
+          await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'logout', token })
+          });
+        } catch { }
+      }
+
+      localStorage.removeItem('vcToken');
+      localStorage.removeItem('vcUser');
+
+      Object.assign(STATE, { currentUser: null, usersList: [], allEntries: [], displayedCount: 0, selectedUser: null, editRowId: null });
+      location.reload();
+    }
+
+    /* ================================================
+       SKELETON LOADERS
+    ================================================ */
+    function renderSkeletonStats() {
+      ['totalCredit', 'totalDebit', 'currentVC', 'totalExpense'].forEach(id => {
+        const el = document.getElementById(id);
+        el.innerHTML = '<div class="skeleton stat-skeleton"></div>';
+      });
+    }
+
+    function renderSkeletonEntries() {
+      const tbody = document.getElementById('entryTableBody');
+      const mobile = document.getElementById('entryCardList');
+      tbody.innerHTML = Array.from({ length: 5 }, () => `
+    <tr>
+      <td><div class="skeleton skeleton-row w-60"></div></td>
+      <td><div class="skeleton skeleton-row w-40"></div></td>
+      <td><div class="skeleton skeleton-row w-60"></div></td>
+      <td><div class="skeleton skeleton-row w-40"></div></td>
+      <td><div class="skeleton skeleton-row w-60"></div></td>
+    </tr>`).join('');
+      mobile.innerHTML = Array.from({ length: 4 }, () => `
+    <div class="entry-card">
+      <div class="skeleton skeleton-row w-80"></div>
+      <div class="skeleton skeleton-row w-60" style="margin-top:8px;"></div>
+    </div>`).join('');
+    }
+
+    /* ================================================
+       LOAD DATA (BACKGROUND, NO BLOCKING UI)
+    ================================================ */
+    async function loadUsersList() {
+      try {
+        const token = localStorage.getItem('vcToken') || '';
+        const res = await fetch(`${API_URL}?action=getUsers&token=${token}`);
+        const data = await res.json();
+        if (data.code === 401) { logout(); return; }
+        if (data.success && data.users) {
+          STATE.usersList = data.users;
+          renderUserOptions();
+        }
+      } catch { /* silent fail – user list is optional */ }
+    }
+
+    async function loadDashboard() {
+      renderSkeletonEntries();
+      try {
+        const token = localStorage.getItem('vcToken') || '';
+        const res = await fetch(`${API_URL}?action=dashboard&token=${token}`);
+        const data = await res.json();
+        if (data.code === 401) { logout(); return; }
+        if (!data.success) { showToast('Load failed', 'Could not load dashboard', 'error'); return; }
+
+        // Update stats
+        STATE.stats = {
+          totalCredit: data.totalCredit || 0,
+          totalDebit: data.totalDebit || 0,
+          currentVC: data.currentVC || 0,
+          totalEntries: data.totalEntries || 0,
+        };
+        updateStats();
+
+        // Store entries and render
+        STATE.allEntries = data.latestEntries || [];
+        STATE.displayedCount = 0;
+        renderEntriesReset();
+
+        loadAuditLogs();
+      } catch {
+        showToast('Connection error', 'Could not reach server', 'error');
+      }
+    }
+
+    /* Silent background refresh — updates stats & state, no skeleton flash */
+    async function silentRefresh() {
+      try {
+        const token = localStorage.getItem('vcToken') || '';
+        const res = await fetch(`${API_URL}?action=dashboard&token=${token}`);
+        const data = await res.json();
+        if (data.code === 401) { logout(); return; }
+        if (!data.success) return;
+        STATE.stats = {
+          totalCredit: data.totalCredit || 0,
+          totalDebit: data.totalDebit || 0,
+          currentVC: data.currentVC || 0,
+          totalExpense: data.totalExpense || 0,
+        };
+        updateStats();
+        // Sync in-memory entries so future edits/deletes work on fresh data
+        STATE.allEntries = data.latestEntries || [];
+        // Re-render entries table quietly (removes pending/temp spinner rows)
+        renderEntriesReset();
+        loadAuditLogs();
+      } catch { /* silent — user already has optimistic UI */ }
+    }
+
+    function refreshDashboard() {
+      const btn = document.getElementById('refreshBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner spinner-sm"></div>';
+      Promise.all([loadDashboard(), loadUsersList()]).finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = '↻ Refresh';
+      });
+    }
+
+    async function loadAuditLogs() {
+      try {
+        const token = localStorage.getItem('vcToken') || '';
+        const res = await fetch(`${API_URL}?action=auditLogs&token=${token}`);
+        const data = await res.json();
+        if (data.code === 401) { logout(); return; }
+        if (data.success && data.logs) {
+          renderRealAuditLogs(data.logs);
+        }
+      } catch (e) { }
+    }
+
+    function updateStats() {
+      const fmt = n => '₹' + Number(n || 0).toLocaleString('en-IN');
+      document.getElementById('totalCredit').textContent = fmt(STATE.stats.totalCredit);
+      document.getElementById('totalDebit').textContent = fmt(STATE.stats.totalDebit);
+      document.getElementById('currentVC').textContent = fmt(STATE.stats.currentVC);
+      document.getElementById('totalExpense').textContent = fmt(STATE.stats.totalExpense);
+    }
+
+    /* ================================================
+       ENTRIES RENDERING
+    ================================================ */
+    function initials(name) {
+      return (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    }
+
+    function getTypeClass(type) {
+      if (type === 'Credit') return 'credit';
+      if (type === 'Expense') return 'expense';
+      return 'debit';
+    }
+
+    function fmtAmount(item) {
+      const type = (item.type || '').toLowerCase();
+      const sign = type === 'credit' ? '+' : '-';
+      return `${sign}₹${Number(item.amount || 0).toLocaleString('en-IN')}`;
+    }
+
+    function renderEntriesReset() {
+      document.getElementById('entryTableBody').innerHTML = '';
+      document.getElementById('entryCardList').innerHTML = '';
+      STATE.displayedCount = 0;
+      renderNextPage();
+    }
+
+    function renderNextPage() {
+      let entries = STATE.allEntries;
+
+      // Type Filter
+      if (STATE.filterType !== 'all') {
+        const type = STATE.filterType.toLowerCase();
+        entries = entries.filter(item => (item.type || '').toLowerCase() === type);
+      }
+
+      // Search Filter
+      if (STATE.searchQuery) {
+        const q = STATE.searchQuery.toLowerCase();
+        entries = entries.filter(item => (item.user || '').toLowerCase().includes(q));
+      }
+
+      const start = STATE.displayedCount;
+      const end = Math.min(start + STATE.PAGE_SIZE, entries.length);
+
+      if (start >= entries.length) {
+        if (entries.length === 0) renderEmptyEntries();
+        return;
+      }
+
+      const slice = entries.slice(start, end);
+      appendEntryRows(slice);
+      STATE.displayedCount = end;
+      document.getElementById('entriesCount').textContent = entries.length + (STATE.displayedCount < entries.length ? '+' : '');
+    }
+
+    function handleSearch(val) {
+      STATE.searchQuery = val;
+      renderEntriesReset();
+    }
+
+    function handleTypeFilter(val) {
+      STATE.filterType = val;
+      renderEntriesReset();
+    }
+
+    function appendEntryRows(items) {
+      const tbody = document.getElementById('entryTableBody');
+      const mobile = document.getElementById('entryCardList');
+
+      items.forEach(item => {
+        const isPending = STATE.pendingOps.has(item.row);
+        const typeClass = getTypeClass(item.type);
+        const amt = fmtAmount(item);
+        const initStr = initials(item.user);
+        const rowId = item.row;
+
+        const dateObj = item.date ? new Date(item.date) : null;
+        const dateStr = dateObj ? dateObj.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+
+        const isAdmin = String(STATE.currentUser.role).toLowerCase() === 'admin';
+        const isExpense = (item.type || '').toLowerCase() === 'expense';
+        const displayMonth = isExpense ? '—' : (item.month || '—');
+
+        // Desktop row
+        const tr = document.createElement('tr');
+        if (isPending) tr.classList.add('pending');
+        tr.dataset.rowId = rowId;
+
+        let actionsHtml = '';
+        if (isAdmin) {
+          actionsHtml = isPending
+            ? `<span style="color:var(--text-3);font-size:12px;display:flex;align-items:center;gap:6px;"><div class="spinner spinner-sm"></div> Saving…</span>`
+            : `<button class="btn-row-edit" onclick='editEntry(${JSON.stringify(item)})'>Edit</button>
+               <button class="btn-row-del"  onclick='confirmDelete(${rowId}, "${(item.user || '').replace(/"/g, '&quot;')}")'>Delete</button>`;
+        } else {
+          actionsHtml = `<span style="color:var(--text-3); font-style:italic; font-size:12px;">Read-only</span>`;
+        }
+
+        tr.innerHTML = `
+      <td style="color:var(--text-2); font-size:13px; white-space:nowrap;">${dateStr}</td>
+      <td>
+        <div class="user-cell">
+          <div class="avatar-sm">${initStr}</div>
+          <span>${item.user || '—'}</span>
+        </div>
+      </td>
+      <td>${displayMonth}</td>
+      <td class="amount-cell ${typeClass}">${amt}</td>
+      <td><span class="badge badge-${typeClass}"><span class="badge-dot"></span>${item.type || '—'}</span></td>
+      <td>
+        <div class="row-actions">
+          ${actionsHtml}
+        </div>
+      </td>`;
+        tbody.appendChild(tr);
+
+        // Mobile card
+        const card = document.createElement('div');
+        card.className = 'entry-card' + (isPending ? ' pending' : '');
+        card.dataset.cardRowId = rowId;
+        card.innerHTML = `
+      <div class="entry-card-top">
+        <div class="entry-user">
+          <div class="avatar-sm">${initStr}</div>
+          <div>
+            <div class="entry-user-name">${item.user || '—'}</div>
+            <div class="entry-user-month">${displayMonth}</div>
+          </div>
+        </div>
+        <div class="entry-amount-big ${typeClass}">${amt}</div>
+      </div>
+      <div class="entry-card-bottom">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="badge badge-${typeClass}"><span class="badge-dot"></span>${item.type || '—'}</span>
+          <span style="color:var(--text-3); font-size:12px;">${dateStr}</span>
+        </div>
+        <div class="entry-card-actions">
+          ${isAdmin
+            ? (isPending
+              ? `<span style="color:var(--text-3);font-size:12px;display:flex;align-items:center;gap:5px;"><div class="spinner spinner-sm"></div>Saving</span>`
+              : `<button class="btn-row-edit" onclick='editEntry(${JSON.stringify(item)})'>Edit</button>
+                   <button class="btn-row-del"  onclick='confirmDelete(${rowId}, "${(item.user || '').replace(/"/g, '&quot;')}")'>Delete</button>`)
+            : `<span style="color:var(--text-3); font-size:12px;">ReadOnly</span>`
+          }
+        </div>
+      </div>`;
+        mobile.appendChild(card);
+      });
+    }
+
+    function renderEmptyEntries() {
+      const empty = `<tr><td colspan="6"><div class="empty-state"><span class="empty-icon">📋</span><div class="empty-text">No entries yet. Add your first entry!</div></div></td></tr>`;
+      document.getElementById('entryTableBody').innerHTML = empty;
+      document.getElementById('entryCardList').innerHTML = `<div class="empty-state"><span class="empty-icon">📋</span><div class="empty-text">No entries yet. Add your first entry!</div></div>`;
+    }
+
+    /* ================================================
+       INFINITE SCROLL
+    ================================================ */
+    (function setupInfiniteScroll() {
+      const sentinel = document.getElementById('entrySentinel');
+      const indicator = document.getElementById('loadMoreIndicator');
+      const rootArea = sentinel.closest('.card-scroll-area');
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          if (STATE.displayedCount >= STATE.allEntries.length) return;
+          indicator.classList.remove('hidden');
+          setTimeout(() => {
+            renderNextPage();
+            indicator.classList.add('hidden');
+          }, 400);
+        });
+      }, {
+        root: rootArea,
+        threshold: 0.1
+      });
+      observer.observe(sentinel);
+    })();
+
+    /* ================================================
+       AUDIT LOGS
+    ================================================ */
+    function renderRealAuditLogs(logs) {
+      const tbody = document.getElementById('auditTableBody');
+      const mobile = document.getElementById('auditCardList');
+      tbody.innerHTML = '';
+      mobile.innerHTML = '';
+
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state"><span class="empty-icon">🗒️</span><div class="empty-text">No audit logs</div></div></td></tr>`;
+        mobile.innerHTML = `<div class="empty-state"><span class="empty-icon">🗒️</span><div class="empty-text">No audit logs</div></div>`;
+        return;
+      }
+
+      logs.forEach(item => {
+        let typeClass = 'info';
+        let icon = 'ℹ️';
+        const actionLower = (item.action || '').toLowerCase();
+
+        if (actionLower.includes('add') || actionLower.includes('credit')) { typeClass = 'credit'; icon = '📥'; }
+        else if (actionLower.includes('delete') || actionLower.includes('failed')) { typeClass = 'debit'; icon = '🗑️'; }
+        else if (actionLower.includes('edit') || actionLower.includes('expense')) { typeClass = 'expense'; icon = '✏️'; }
+        if (actionLower.includes('login') || actionLower.includes('logout')) { typeClass = 'info'; icon = '👤'; }
+
+        const dateStr = item.date ? new Date(item.date).toLocaleString('en-IN', {
+          day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        }) : '';
+
+        // Desktop row
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+        <td><span class="badge badge-${typeClass}"><span class="badge-dot"></span>${item.action || 'Event'}</span></td>
+        <td>
+          <div class="user-cell">
+            <div class="avatar-sm">${initials(item.user)}</div>
+            ${item.user || '—'}
+          </div>
+        </td>
+        <td>${item.performedBy || 'System'}</td>
+        <td style="color:var(--text-2); font-size: 13px;">
+          <div>${item.details || ''}</div>
+          <div style="font-size:11px; margin-top:3px; opacity:0.7;">${dateStr}</div>
+        </td>`;
+        tbody.appendChild(tr);
+
+        // Mobile audit card
+        const card = document.createElement('div');
+        card.className = 'audit-card';
+        card.innerHTML = `
+        <div class="audit-icon-wrap ${typeClass}">${icon}</div>
+        <div class="audit-info">
+          <div class="audit-action">${item.action || 'Event'} — ${item.user || '—'}</div>
+          <div class="audit-meta" style="white-space: normal;">By ${item.performedBy || 'System'} · ${dateStr}</div>
+          <div style="font-size: 12px; color: var(--text-2); margin-top: 4px; line-height: 1.4;">${item.details || ''}</div>
+        </div>`;
+        mobile.appendChild(card);
+      });
+    }
+
+    /* ================================================
+       CUSTOM USER SELECT COMPONENT
+    ================================================ */
+    function toggleUserDrop(forceClose) {
+      const drop = document.getElementById('userDropdown');
+      const trigger = document.getElementById('userSelectTrigger');
+      const chevron = document.getElementById('userChevron');
+      const isOpen = drop.classList.contains('open');
+      if (forceClose || isOpen) {
+        drop.classList.remove('open');
+        trigger.classList.remove('open');
+        chevron.classList.remove('up');
+      } else {
+        drop.classList.add('open');
+        trigger.classList.add('open');
+        chevron.classList.add('up');
+        document.getElementById('userSearch').focus();
+      }
+    }
+
+    function renderUserOptions(list) {
+      const ul = document.getElementById('userOptionList');
+      const src = list ?? STATE.usersList;
+      ul.innerHTML = '';
+      if (!src.length) {
+        ul.innerHTML = '<div class="select-empty">No users found</div>';
+        return;
+      }
+      src.forEach(u => {
+        const div = document.createElement('div');
+        div.className = 'select-opt' + (STATE.selectedUser === u ? ' selected' : '');
+        div.innerHTML = `<div class="avatar-xs">${initials(u)}</div>${u}`;
+        div.onclick = () => pickUser(u);
+        ul.appendChild(div);
+      });
+    }
+
+    function pickUser(u) {
+      STATE.selectedUser = u;
+      document.getElementById('userSelectLabel').textContent = u;
+      document.getElementById('userSelectLabel').classList.remove('select-placeholder');
+      toggleUserDrop(true);
+    }
+
+    function filterUsers() {
+      const q = document.getElementById('userSearch').value.toLowerCase();
+      const filtered = STATE.usersList.filter(u => u.toLowerCase().includes(q));
+      renderUserOptions(filtered);
+    }
+
+    // Close user dropdown on outside click
+    document.addEventListener('click', e => {
+      const wrap = document.getElementById('userSelectWrap');
+      if (wrap && !wrap.contains(e.target)) toggleUserDrop(true);
+    });
+
+    /* ================================================
+       ENTRY MODAL
+    ================================================ */
+    function openEntryModal() {
+      STATE.editRowId = null;
+      STATE.selectedUser = null;
+      document.getElementById('modalTitle').textContent = 'Add New Entry';
+      document.getElementById('modalSub').textContent = 'Fill in the details below';
+      document.getElementById('userSelectLabel').textContent = 'Select User';
+      document.getElementById('userSelectLabel').className = 'select-placeholder';
+      document.getElementById('entryMonth').value = '';
+      document.getElementById('entryAmount').value = '';
+      document.getElementById('entryType').value = 'Credit';
+      document.getElementById('userSearch').value = '';
+      renderUserOptions();
+      document.getElementById('entryModal').classList.add('open');
+    }
+
+    function closeEntryModal() {
+      document.getElementById('entryModal').classList.remove('open');
+    }
+
+    function editEntry(item) {
+      STATE.editRowId = item.row;
+      STATE.selectedUser = item.user || null;
+      document.getElementById('modalTitle').textContent = 'Edit Entry';
+      document.getElementById('modalSub').textContent = `Editing ${item.user || 'entry'}`;
+      const lbl = document.getElementById('userSelectLabel');
+      lbl.textContent = item.user || 'Select User';
+      lbl.className = item.user ? '' : 'select-placeholder';
+      document.getElementById('entryMonth').value = item.month || '';
+      document.getElementById('entryAmount').value = item.amount || '';
+      document.getElementById('entryType').value = item.type || 'Credit';
+      document.getElementById('userSearch').value = '';
+      renderUserOptions();
+      document.getElementById('entryModal').classList.add('open');
+    }
+
+    /* ================================================
+       SAVE ENTRY (LOCAL-FIRST / OPTIMISTIC)
+    ================================================ */
+    async function saveEntry() {
+      const user = STATE.selectedUser;
+      const month = document.getElementById('entryMonth').value.trim();
+      const amount = document.getElementById('entryAmount').value.trim();
+      const type = document.getElementById('entryType').value.trim();
+      const isEdit = !!STATE.editRowId;
+
+      if (!user || !month || !amount || !type) {
+        showToast('Incomplete form', 'Please fill all fields', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('saveEntryBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner spinner-sm"></div> Saving…';
+
+      const performer = STATE.currentUser.name || STATE.currentUser.username || 'System';
+      const payload = {
+        action: isEdit ? 'edit' : 'add',
+        row: STATE.editRowId,
+        user, month, amount, type,
+        performedBy: performer,
+        token: localStorage.getItem('vcToken'),
+        timestamp: Date.now()
+      };
+
+      /* --- LOCAL-FIRST: update UI immediately, no spinner on row --- */
+      if (isEdit) {
+        // Update in-memory array
+        const idx = STATE.allEntries.findIndex(e => e.row == STATE.editRowId);
+        if (idx !== -1) STATE.allEntries[idx] = { ...STATE.allEntries[idx], user, month, amount, type };
+        // Show updated row immediately (done state, no spinner)
+        refreshEntryDOM(STATE.editRowId, { ...STATE.allEntries[idx] || {}, user, month, amount, type, row: STATE.editRowId }, 'done');
+      } else {
+        const tempId = 'temp_' + Date.now();
+        const newEntry = { row: tempId, user, month, amount: Number(amount), type };
+        STATE.allEntries.unshift(newEntry);
+        STATE.pendingOps.set(tempId, 'saving');
+        STATE.displayedCount++;
+        prependOptimisticRow(newEntry);
+        document.getElementById('entriesCount').textContent = STATE.displayedCount + (STATE.displayedCount < STATE.allEntries.length ? '+' : '');
+      }
+
+      closeEntryModal();
+      btn.disabled = false;
+      btn.textContent = 'Save Entry';
+
+      /* --- Background API call (fire-and-forget, always reload after) --- */
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const respData = await res.json();
+        if (respData.code === 401) { logout(); return; }
+        if (!respData.success) { showToast('Error', respData.message, 'error'); return; }
+        showToast(isEdit ? 'Entry updated' : 'Entry added', '', 'success');
+      } catch (err) {
+        showToast('Sync issue', 'Refreshing to confirm…', 'info');
+      }
+      // Silently sync stats & state in background (no skeleton flash)
+      setTimeout(() => silentRefresh(), 800);
+    }
+
+    function prependOptimisticRow(entry) {
+      const typeClass = getTypeClass(entry.type);
+      const amt = fmtAmount(entry);
+      const initStr = initials(entry.user);
+
+      // Desktop
+      const tbody = document.getElementById('entryTableBody');
+      const tr = document.createElement('tr');
+      tr.className = 'pending';
+      tr.dataset.rowId = entry.row;
+      tr.innerHTML = `
+    <td><div class="user-cell"><div class="avatar-sm">${initStr}</div><span>${entry.user}</span></div></td>
+    <td>${entry.month}</td>
+    <td class="amount-cell ${typeClass}">${amt}</td>
+    <td><span class="badge badge-${typeClass}"><span class="badge-dot"></span>${entry.type}</span></td>
+    <td><span style="color:var(--text-3);font-size:12px;display:flex;align-items:center;gap:6px;"><div class="spinner spinner-sm"></div>Saving…</span></td>`;
+      tbody.insertBefore(tr, tbody.firstChild);
+
+      // Mobile
+      const mobile = document.getElementById('entryCardList');
+      const card = document.createElement('div');
+      card.className = 'entry-card pending';
+      card.dataset.cardRowId = entry.row;
+      card.innerHTML = `
+    <div class="entry-card-top">
+      <div class="entry-user">
+        <div class="avatar-sm">${initStr}</div>
+        <div><div class="entry-user-name">${entry.user}</div><div class="entry-user-month">${entry.month}</div></div>
+      </div>
+      <div class="entry-amount-big ${typeClass}">${amt}</div>
+    </div>
+    <div class="entry-card-bottom">
+      <span class="badge badge-${typeClass}"><span class="badge-dot"></span>${entry.type}</span>
+      <span style="color:var(--text-3);font-size:12px;display:flex;align-items:center;gap:5px;"><div class="spinner spinner-sm"></div>Saving</span>
+    </div>`;
+      mobile.insertBefore(card, mobile.firstChild);
+    }
+
+    function refreshEntryDOM(rowId, entry, state) {
+      const typeClass = getTypeClass(entry.type);
+      const amt = fmtAmount(entry);
+      const initStr = initials(entry.user);
+      // Safe JSON for inline onclick — escape single quotes
+      const safeEntry = JSON.stringify(entry).replace(/'/g, '&#39;');
+      const actionsHTML = state === 'saving'
+        ? `<span style="color:var(--text-3);font-size:12px;display:flex;align-items:center;gap:6px;"><div class="spinner spinner-sm"></div>Saving…</span>`
+        : `<button class="btn-row-edit" onclick='editEntry(${safeEntry})'>Edit</button>
+       <button class="btn-row-del"  onclick='confirmDelete(${rowId}, "${(entry.user || '').replace(/"/g, '&quot;')}")'>Delete</button>`;
+
+      // Desktop
+      const tr = document.querySelector(`tr[data-row-id="${rowId}"]`);
+      if (tr) {
+        tr.className = state === 'saving' ? 'pending' : '';
+        tr.innerHTML = `
+      <td><div class="user-cell"><div class="avatar-sm">${initStr}</div><span>${entry.user || '—'}</span></div></td>
+      <td>${entry.month || '—'}</td>
+      <td class="amount-cell ${typeClass}">${amt}</td>
+      <td><span class="badge badge-${typeClass}"><span class="badge-dot"></span>${entry.type || '—'}</span></td>
+      <td><div class="row-actions">${actionsHTML}</div></td>`;
+      }
+      // Mobile
+      const card = document.querySelector(`[data-card-row-id="${rowId}"]`);
+      if (card) {
+        card.className = 'entry-card' + (state === 'saving' ? ' pending' : '');
+        card.innerHTML = `
+      <div class="entry-card-top">
+        <div class="entry-user">
+          <div class="avatar-sm">${initStr}</div>
+          <div><div class="entry-user-name">${entry.user || '—'}</div><div class="entry-user-month">${entry.month || '—'}</div></div>
+        </div>
+        <div class="entry-amount-big ${typeClass}">${amt}</div>
+      </div>
+      <div class="entry-card-bottom">
+        <span class="badge badge-${typeClass}"><span class="badge-dot"></span>${entry.type || '—'}</span>
+        <div class="entry-card-actions">${actionsHTML}</div>
+      </div>`;
+      }
+    }
+
+    /* ================================================
+       DELETE ENTRY (LOCAL-FIRST / OPTIMISTIC)
+    ================================================ */
+    function confirmDelete(rowId, user) {
+      openConfirm(
+        'Delete Entry',
+        `Remove ${user ? `"${user}"` : 'this entry'}? This cannot be undone.`,
+        '🗑️',
+        () => performDelete(rowId, user)
+      );
+    }
+
+    async function performDelete(rowId, user) {
+      // Optimistic: remove from UI immediately
+      const tr = document.querySelector(`tr[data-row-id="${rowId}"]`);
+      const card = document.querySelector(`[data-card-row-id="${rowId}"]`);
+
+      // Animate out
+      if (tr) { tr.style.transition = 'opacity 0.25s'; tr.style.opacity = '0'; tr.style.pointerEvents = 'none'; }
+      if (card) { card.style.transition = 'opacity 0.25s'; card.style.opacity = '0'; card.style.pointerEvents = 'none'; }
+
+      // Remove from in-memory state immediately (optimistic)
+      STATE.allEntries = STATE.allEntries.filter(e => String(e.row) !== String(rowId));
+      STATE.displayedCount = Math.max(0, STATE.displayedCount - 1);
+
+      setTimeout(() => {
+        if (tr) tr.remove();
+        if (card) card.remove();
+      }, 260);
+
+      showToast('Entry deleted', '', 'success');
+
+      /* --- Fire delete API in background — always reload after --- */
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'delete',
+            row: rowId,
+            user,
+            performedBy: STATE.currentUser.name || STATE.currentUser.username || 'System',
+            token: localStorage.getItem('vcToken'),
+            timestamp: Date.now()
+          })
+        });
+        const respData = await res.json();
+        if (respData.code === 401) { logout(); return; }
+        if (!respData.success) { showToast('Error', respData.message, 'error'); return; }
+      } catch {
+        showToast('Sync issue', 'Refreshing to confirm…', 'info');
+      }
+      // Silently sync stats & state in background (no skeleton flash)
+      setTimeout(() => silentRefresh(), 900);
+    }
+
+    /* ================================================
+       EXPENSE MODAL
+    ================================================ */
+    function openExpenseModal() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('expenseDate').value = today;
+      document.getElementById('expenseDesc').value = '';
+      document.getElementById('expenseAmount').value = '';
+      document.getElementById('expenseModal').classList.add('open');
+      setTimeout(() => document.getElementById('expenseDesc').focus(), 80);
+    }
+
+    function closeExpenseModal() {
+      document.getElementById('expenseModal').classList.remove('open');
+    }
+
+    async function saveExpense() {
+      const desc = document.getElementById('expenseDesc').value.trim();
+      const amount = document.getElementById('expenseAmount').value.trim();
+      const date = document.getElementById('expenseDate').value;
+
+      if (!desc || !amount || !date) {
+        showToast('Incomplete form', 'Please fill all fields', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('saveExpenseBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner spinner-sm"></div> Saving…';
+
+      const performer = STATE.currentUser.name || STATE.currentUser.username || 'System';
+
+      // Format date for display (e.g. "18 Apr 2026")
+      const [y, m, d] = date.split('-');
+      const dateLabel = new Date(+y, +m - 1, +d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      // Optimistic: prepend row immediately
+      const tempId = 'exp_' + Date.now();
+      const newEntry = { row: tempId, user: desc, month: dateLabel, amount: Number(amount), type: 'Expense' };
+      STATE.allEntries.unshift(newEntry);
+      STATE.pendingOps.set(tempId, 'saving');
+      STATE.displayedCount++;
+      prependOptimisticRow(newEntry);
+      document.getElementById('entriesCount').textContent =
+        STATE.displayedCount + (STATE.displayedCount < STATE.allEntries.length ? '+' : '');
+
+      closeExpenseModal();
+      btn.disabled = false;
+      btn.innerHTML = '💸 Save Expense';
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'addExpense',
+            description: desc,
+            amount,
+            date,
+            performedBy: performer,
+            token: localStorage.getItem('vcToken'),
+            timestamp: Date.now()
+          })
+        });
+        const respData = await res.json();
+        if (respData.code === 401) { logout(); return; }
+        if (!respData.success) { showToast('Error', respData.message, 'error'); return; }
+        showToast('Expense added', desc, 'success');
+      } catch {
+        showToast('Sync issue', 'Refreshing to confirm…', 'info');
+      }
+      setTimeout(() => silentRefresh(), 800);
+    }
+
+    /* ================================================
+       KEYBOARD & CLOSE EVENTS
+    ================================================ */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeEntryModal();
+        closeExpenseModal();
+        closeConfirm();
+        toggleUserDrop(true);
+      }
+      if (e.key === 'Enter' && document.getElementById('loginPage').style.display !== 'none') {
+        if (document.activeElement?.id === 'password' || document.activeElement?.id === 'username') login();
+      }
+    });
+
+    document.getElementById('entryModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('entryModal')) closeEntryModal();
+    });
+    document.getElementById('confirmModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('confirmModal')) closeConfirm();
+    });
+    document.getElementById('expenseModal').addEventListener('click', e => {
+      if (e.target === document.getElementById('expenseModal')) closeExpenseModal();
+    });
+
+    // Enter key for login
+    document.getElementById('password').addEventListener('keypress', e => {
+      if (e.key === 'Enter') login();
+    });
+    document.getElementById('username').addEventListener('keypress', e => {
+      if (e.key === 'Enter') document.getElementById('password').focus();
+    });
+
+    // App Boot Guard
+    (function checkSession() {
+      if (localStorage.getItem('vcToken')) {
+        const cachedUser = localStorage.getItem('vcUser');
+        if (cachedUser) {
+          try {
+            STATE.currentUser = JSON.parse(cachedUser);
+            showDashboard();
+            loadUsersList();
+            loadDashboard();
+          } catch {
+            localStorage.removeItem('vcToken');
+            localStorage.removeItem('vcUser');
+          }
+        }
+      }
+    })();
+  </script>
+</body>
+
+</html>
