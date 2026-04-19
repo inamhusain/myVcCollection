@@ -827,6 +827,14 @@
     }
 
     /* ============================
+   MOBILE FAB & OVERLAYS (HIDDEN BY DEFAULT ON DESKTOP)
+==============================*/
+    .fab-wrapper,
+    .fab-backdrop {
+      display: none;
+    }
+
+    /* ============================
    LOGIN PAGE
 ==============================*/
     #loginPage {
@@ -1737,6 +1745,7 @@
         background: rgba(0, 0, 0, 0.3);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
+        display: block; /* Ensure it's not display: none on mobile */
         opacity: 0;
         pointer-events: none;
         transition: 0.25s ease;
@@ -1820,7 +1829,7 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       }
 
-      .fab-wrapper {
+      .fab-wrapper.is-admin {
         display: flex;
       }
 
@@ -2333,9 +2342,9 @@
       document.getElementById('headerAddEntryBtn').style.display = hideIfMember;
       document.getElementById('auditSection').style.display = hideIfMember;
 
-      // Hide FAB if member
+      // Toggle admin class for FAB - CSS media queries will handle width visibility
       const fab = document.getElementById('fabWrapper');
-      if (fab) fab.style.display = isAdmin ? 'flex' : 'none';
+      if (fab) fab.classList.toggle('is-admin', isAdmin);
     }
 
     function toggleUserMenu(e) {
