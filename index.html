@@ -360,10 +360,7 @@
     select.input {
       cursor: pointer;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      padding-right: 38px;
+      padding-right: 12px;
     }
 
     select.input option {
@@ -1282,11 +1279,11 @@
     }
 
     .amount-cell.credit {
-      color: #6ee7b7;
+      color: #2dd4bf;
     }
 
     .amount-cell.debit {
-      color: #fca5a5;
+      color: #fb7185;
     }
 
     .amount-cell.expense {
@@ -1438,6 +1435,10 @@
       color: #fca5a5;
     }
 
+    .entry-amount-big.expense {
+      color: #fcd34d;
+    }
+
     .entry-card-bottom {
       display: flex;
       flex-direction: column;
@@ -1530,6 +1531,21 @@
       color: #fca5a5;
     }
 
+    .badge-credit {
+      background: rgba(16, 185, 129, 0.12);
+      color: #6ee7b7;
+    }
+
+    .badge-debit {
+      background: rgba(239, 68, 68, 0.12);
+      color: #fca5a5;
+    }
+
+    .badge-expense {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fcd34d;
+    }
+
     .audit-icon-wrap.info {
       background: rgba(59, 130, 246, 0.12);
       color: #60a5fa;
@@ -1571,6 +1587,10 @@
 
     .audit-amount.debit {
       color: #fca5a5;
+    }
+
+    .audit-amount.expense {
+      color: #fcd34d;
     }
 
     /* ============================
@@ -1745,7 +1765,8 @@
         background: rgba(0, 0, 0, 0.3);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        display: block; /* Ensure it's not display: none on mobile */
+        display: block;
+        /* Ensure it's not display: none on mobile */
         opacity: 0;
         pointer-events: none;
         transition: 0.25s ease;
@@ -2452,6 +2473,7 @@
           totalCredit: data.totalCredit || 0,
           totalDebit: data.totalDebit || 0,
           currentVC: data.currentVC || 0,
+          totalExpense: data.totalExpense || 0,
           totalEntries: data.totalEntries || 0,
         };
         updateStats();
@@ -2891,8 +2913,12 @@
       document.getElementById('modalSub').textContent = 'Fill in the details below';
       document.getElementById('userSelectLabel').textContent = 'Select User';
       document.getElementById('userSelectLabel').className = 'select-placeholder';
-      document.getElementById('entryMonth').value = '';
-      document.getElementById('entryAmount').value = '';
+
+      // Pre-fill current month and default amount
+      const currentMonth = new Date().toLocaleString('en-US', { month: 'long' });
+      document.getElementById('entryMonth').value = currentMonth;
+      document.getElementById('entryAmount').value = '500';
+
       document.getElementById('entryType').value = 'Credit';
       document.getElementById('userSearch').value = '';
       renderUserOptions();
